@@ -1,1 +1,1 @@
-A AI-00075 é um objeto de aprendizagem destinado ao treinamento das construções geométricas envolvidas no problema das lentes esféricas, segundo a óptica geométrica.
+Objeto de aprendizagem destinado ao treinamento das construções geométricas envolvidas no problema dos espelhos esféricos, segundo a óptica geométrica.
