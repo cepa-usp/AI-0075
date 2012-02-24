@@ -22,13 +22,19 @@ package view
 		
 		public function init():void {
 			stage.addEventListener(MouseEvent.MOUSE_UP, release)
+			stage.addEventListener(Event.ENTER_FRAME, onMove)
 			this.startDrag(true);
+		}
+		
+		public function onMove(e:Event) {
+			dispatchEvent(new Event("PositionChanged", true));
 		}
 		
 		
 		private function release(e:MouseEvent):void 
 		{
 			this.stopDrag();
+			stage.removeEventListener(Event.ENTER_FRAME, onMove)
 			stage.removeEventListener(MouseEvent.MOUSE_UP, release)
 			dispatchEvent(new Event(Event.COMPLETE));
 		}

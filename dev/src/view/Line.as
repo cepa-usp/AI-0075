@@ -2,9 +2,11 @@ package view
 {
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
+	import flash.display.LineScaleMode;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
@@ -61,15 +63,66 @@ package view
 				pt1 = new Point(handler1.x, handler1.y); 
 				pt0= new Point(handler2.x, handler2.y); 
 			}
-			var pos:Number = (_xposition - pt0.x) / (pt1.x - pt0.x);
-			centralPoint = Point.interpolate(new Point(pt1.x, pt1.y), new Point(pt0.x, pt0.y), pos);			
+			
 			line.graphics.clear();
-			line.graphics.moveTo(pt0.x, pt0.y)			
-			line.graphics.lineStyle(1, 0, 1);			
-			//line.graphics.lineGradientStyle(GradientType.LINEAR, [0, 1, 0, 1, 0, 1], [1, 1, 1, 1, 1, 1], [255 / 6, 255*2 / 6, 255*3 / 6, 255*4 / 6, 255*5 / 6, 255*6 / 6]) 
-			line.graphics.lineTo(centralPoint.x, centralPoint.y);
-			line.graphics.lineStyle(1, 0x008040, 1);			
-			line.graphics.lineTo(pt1.x, pt1.y);
+			changeLineStyle(1)
+			var lastPoint:Point = pt0.clone();
+			line.graphics.moveTo(pt0.x, pt0.y)
+			var f1:Boolean = (pt0.x < _xposition)
+			var f2:Boolean = (pt1.x < _xposition)
+			if ( f1 != f2) {
+				var pos:Number = (_xposition - pt0.x) / (pt1.x - pt0.x);
+				centralPoint = Point.interpolate(new Point(pt1.x, pt1.y), new Point(pt0.x, pt0.y), pos);											
+				drawLineStyled(true, lastPoint, centralPoint.clone());
+				lastPoint = centralPoint.clone();
+				changeLineStyle(2)
+				drawLineStyled(false, lastPoint, pt1.clone());
+			} else {
+				drawLineStyled(f1, lastPoint, pt1);
+			}
+			//
+		}
+		
+		private function drawLineStyled(side:Boolean, ptIni:Point, ptEnd:Point):void {
+			trace("side", side);
+			if (side) {
+				line.graphics.lineStyle(0.5, 0xFF8000, 1, true, LineScaleMode.NONE);
+				drawDottedLine(ptIni, ptEnd)
+			} else {
+				line.graphics.lineStyle(0.5, 0xFF3C3C, 1,true, LineScaleMode.NONE);				
+				line.graphics.lineTo(ptEnd.x, ptEnd.y);
+			}
+		}
+		
+		private function changeLineStyle(val:int):void {
+			return;
+			if (_side) {
+				if (val == 2) line.graphics.lineStyle(0.5, 0xFF8000, 1, true, LineScaleMode.NONE);
+				if (val==1) line.graphics.lineStyle(0.5, 0xFF3C3C, 1,true, LineScaleMode.NONE);				
+			} else {
+				if (val == 2) line.graphics.lineStyle(0.5, 0xFF3C3C, 1, true, LineScaleMode.NONE);
+				if (val==1) line.graphics.lineStyle(0.5, 0xFF8000, 1,true, LineScaleMode.NONE);								
+			}
+		}
+		
+		public function drawDottedLine(ptIni:Point, ptEnd:Point):void {
+			var size:int =5;			
+			var pEnd:Point;
+			var step:Boolean = true;
+			var dist:Number = Point.distance(ptIni, ptEnd);
+			for (var i:int = 0; i< Math.floor(dist / size); i++) {	
+				pEnd = Point.interpolate(ptEnd, ptIni, i / (dist / size))
+				if(step){
+					line.graphics.lineTo(Math.floor(pEnd.x), Math.floor(pEnd.y));
+					step = false;
+				} else {
+					line.graphics.moveTo(pEnd.x, pEnd.y);
+					step = true;
+				}				
+			}
+			
+			
+			
 		}
 		
 		

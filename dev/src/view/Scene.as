@@ -2,6 +2,7 @@ package view
 {
 	import fl.motion.ITween;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.geom.Point;
 	import model.Challenge;
 	import model.ChallengeElement;
@@ -15,6 +16,9 @@ package view
 	{
 		
 		private var layerLines:Sprite = new Sprite();
+		private var _layerObject:Sprite = new Sprite();
+		
+		
 		private var layerChallenge:Sprite = new Sprite();
 		private var _mirror:Sprite;
 		private var image:SpriteArrow;
@@ -22,7 +26,8 @@ package view
 		private var focus:SpriteDot;
 		private var center:SpriteDot;
 		private var element:ChallengeElement;
-		private var scale:Number = 0;
+		private var _scale:Number = 0;
+		private var challenge:Challenge;
 		
 		public function Scene() 
 		{
@@ -30,11 +35,13 @@ package view
 		}
 		
 		public function draw(challenge:Challenge):void {
+			this.challenge = challenge;
 			layerChallenge.graphics.lineStyle(2, 0x383838);
 			layerChallenge.graphics.moveTo(0, Config.HEIGHT / 2);
 			layerChallenge.graphics.lineTo(Config.WIDTH, Config.HEIGHT / 2);
 			addChild(layerChallenge);
-			addChild(layerLines);			
+			addChild(layerObject);
+			addChild(layerLines);						
 			setElementsPosition(challenge);
 		}
 		
@@ -75,7 +82,8 @@ package view
 		
 		public function addLine(mx:Number,my:Number):void 
 		{
-			var l:Line = new Line(mirror.x, true, new Point(mx, my), this);
+			
+			var l:Line = new Line(mirror.x, (challenge.mirror.type==Mirror.CONCAVE?true:false), new Point(mx, my), this);
 		}
 		
 		private function drawFocus(challenge:Challenge):void 
@@ -136,9 +144,60 @@ package view
 			return _mirror;
 		}
 		
+		public function addGhostElement(dh:DragHandler):void {
+			layerObject.addChild(dh);
+			dh.addEventListener("PositionChanged", onHandlerChanged);
+		}
+		
+		public function setElementAtPosition():void {
+			
+		}
+		
+		private function onHandlerChanged(e:Event):void 
+		{
+			layerObject.graphics.clear();
+			var dh:DragHandler = DragHandler(e.target);
+			layerObject.graphics.lineStyle(1, 0x008080, 0.8);
+			layerObject.graphics.moveTo(dh.x, dh.y);
+			layerObject.graphics.lineTo(dh.x, Config.HEIGHT / 2);
+			getDistanceFromPosition(dh.x);
+			
+		}
+		
+		
+		private function getDistanceFromPosition(x:Number):Number {
+			
+			var dMin:Number = Math.min(image.x, object.x, focus.x, center.x, mirror.x);
+			var margin:int = 150;
+			var xMirror:Number = mirror.x;
+			var d:Number =  (x + dMin + margin - xMirror)
+			trace(d)
+			return d;
+		}		
+				
 		public function set mirror(value:Sprite):void 
 		{
 			_mirror = value;
+		}
+		
+		public function get layerObject():Sprite 
+		{
+			return _layerObject;
+		}
+		
+		public function set layerObject(value:Sprite):void 
+		{
+			_layerObject = value;
+		}
+		
+		public function get scale():Number 
+		{
+			return _scale;
+		}
+
+		public function set scale(value:Number):void 
+		{
+			_scale = value;
 		}
 		
 		

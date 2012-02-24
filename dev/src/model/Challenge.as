@@ -23,7 +23,7 @@ package model
 		}
 		
 		public function createChallenge(focusDistance:Number=Number.NaN, objectDistance:Number=Number.NaN, objectSize:Number=Number.NaN, mirrorType:int=-1):void {
-
+			this.state = CHALLENGESTATUS_CREATING;
 			mirror = new Mirror();
 			if(mirrorType==-1){
 				mirror.type = Math.floor(Math.random() * 2);
@@ -55,7 +55,8 @@ package model
 			}
 			
 			
-			image = new Obj();			
+			image = new Obj();		
+			image.image = true;
 			image.distance = 1 / ((1 / mirror.focus.distance) - (1 / object.distance));
 			
 			image.size = ((image.distance * -1) * object.size) / object.distance;
@@ -69,16 +70,17 @@ package model
 			
 			var rnd:int = Math.floor(Math.random() * 3);
 			switch(rnd) {
-				case 1:
+				case 0:
 					hiddenElement = object;
 					break;
-				case 2:
+				case 1:
 					hiddenElement = image;
 					break;
-				case 3:
+				case 2:
 					hiddenElement = mirror.focus;
 					break;
 			}
+			this.state = CHALLENGESTATUS_WAITINGPOSITION;
 		}
 		
 		public function get mirror():Mirror 
@@ -139,6 +141,7 @@ package model
 		public function set state(value:int):void 
 		{
 			_state = value;
+			eventDispatcher.dispatchEvent(new ChallengeEvent(ChallengeEvent.STATE_CHANGE, true));
 		}
 		
 		public function toString():String {
@@ -153,10 +156,11 @@ package model
 		}
 		
 		
-		public static const CHALLENGESTATUS_CREATING = 1;
-		public static const CHALLENGESTATUS_WAITINGANSWER = 2;
-		public static const CHALLENGESTATUS_EVALUATING = 3;
-		public static const CHALLENGESTATUS_SHOWANSWER = 4;		
+		public static const CHALLENGESTATUS_CREATING:int = 1;
+		public static const CHALLENGESTATUS_WAITINGPOSITION:int = 2;
+		public static const CHALLENGESTATUS_WAITINGANSWER:int = 3;
+		public static const CHALLENGESTATUS_EVALUATING:int = 4;
+		public static const CHALLENGESTATUS_SHOWANSWER:int = 5;		
 		
 		
 		
