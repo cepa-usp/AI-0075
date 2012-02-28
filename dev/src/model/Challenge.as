@@ -15,6 +15,8 @@ package model
 		private var _image:Obj;
 		private var _state:int = 0;
 		private var _hiddenElement:ChallengeElement;
+		private var _element:ChallengeElement;
+		private var _score:Number = 0;
 		
 		
 		public function Challenge() 
@@ -71,16 +73,48 @@ package model
 			var rnd:int = Math.floor(Math.random() * 3);
 			switch(rnd) {
 				case 0:
-					hiddenElement = object;
+					hiddenElement = object.clone();
+					element = object;
 					break;
 				case 1:
-					hiddenElement = image;
+					hiddenElement = image.clone();
+					element = image;
 					break;
 				case 2:
-					hiddenElement = mirror.focus;
+					hiddenElement = mirror.focus.clone();
+					element = mirror.focus;
 					break;
 			}
 			this.state = CHALLENGESTATUS_WAITINGPOSITION;
+		}
+		
+		public function evaluate():void {
+			state = CHALLENGESTATUS_EVALUATING;
+			var distancia:Number = 0;
+			var sentido:Number = 100;
+			var tamanho:Number = 100;
+						
+			if (hiddenElement.distance <  element.distance + 2*(element.distance/10) && hiddenElement.distance > element.distance - 2*(element.distance/10)) distancia = 80;
+			if (hiddenElement.distance <  element.distance + element.distance/10 && hiddenElement.distance > element.distance - element.distance/10) distancia = 100;
+			
+			
+			
+			if (element is Obj) {
+				if (Obj(element).image == true) {
+					tamanho = 0;
+					if (hiddenElement.size <  element.size + 2*(element.size/10) && hiddenElement.size> element.size - 2*(element.size/10)) tamanho = 80;
+					if (hiddenElement.size <  element.size + element.size/10 && hiddenElement.size > element.size - element.size/10) tamanho = 100;
+					
+				
+					sentido = 0;
+					if (hiddenElement.inverted == element.inverted) sentido = 100;					
+				}
+			}
+			
+			score = Math.min(distancia, tamanho, sentido);
+			trace(distancia, tamanho, sentido, score);
+			
+			
 		}
 		
 		public function get mirror():Mirror 
@@ -142,6 +176,26 @@ package model
 		{
 			_state = value;
 			eventDispatcher.dispatchEvent(new ChallengeEvent(ChallengeEvent.STATE_CHANGE, true));
+		}
+		
+		public function get element():ChallengeElement 
+		{
+			return _element;
+		}
+		
+		public function set element(value:ChallengeElement):void 
+		{
+			_element = value;
+		}
+		
+		public function get score():Number 
+		{
+			return _score;
+		}
+		
+		public function set score(value:Number):void 
+		{
+			_score = value;
 		}
 		
 		public function toString():String {

@@ -11,7 +11,9 @@ package view
 	import flash.geom.Point;
 	import model.Challenge;
 	import model.ChallengeElement;
+	import model.Focus;
 	import model.Mirror;
+	import model.Obj;
 	import view.DragHandler;
 	
 	/**
@@ -24,6 +26,7 @@ package view
 		private var layerLines:Sprite = new Sprite();
 		private var _layerObject:Sprite = new Sprite();
 		private var layerChallenge:Sprite = new Sprite();
+		private var layerResizer:Sprite = new Sprite();
 		private var _mirror:Sprite;
 		private var image:SpriteArrow;
 		private var object:SpriteArrow;
@@ -42,12 +45,28 @@ package view
 		public function draw(challenge:Challenge):void {
 			this.challenge = challenge;
 			layerChallenge.graphics.lineStyle(2, 0x383838);
+			
 			layerChallenge.graphics.moveTo(0, Config.HEIGHT / 2);
 			layerChallenge.graphics.lineTo(Config.WIDTH, Config.HEIGHT / 2);
 			addChild(layerChallenge);
 			addChild(layerObject);
 			addChild(layerLines);						
+			addChild(layerResizer);
 			setElementsPosition(challenge);
+			hideElement();
+		}
+		
+		public function hideElement():void {
+			return;
+			if (challenge.element == challenge.image) {
+				this.image.alpha = 0;
+			}
+			if (challenge.element == challenge.object) {
+				this.object.alpha = 0;
+			}
+			if (challenge.element == challenge.mirror.focus) {
+				this.focus.alpha = 0;
+			}			
 		}
 		
 		public function calculateScaleFactor(challenge:Challenge):void {
@@ -159,16 +178,103 @@ package view
 		{
 			//removeChild(handler);
 			spriteElement = Sprite(DragHandler(handler).getIcon());
+			if (challenge.element is Focus) {
+				var cc:Sprite = new SpriteDot();
+				cc.scaleX = spriteElement.scaleX;
+				cc.scaleY = spriteElement.scaleY;
+				cc.name = "cc";
+				spriteElement.addChild(cc);
+				cc.x = 0; cc.y = 0;
+				
+			}
 			addChild(spriteElement);
 			spriteElement.x = handler.x;
-			Actuate.tween(spriteElement, 0.5, {y:Config.HEIGHT/2}, true).ease(Elastic.easeInOut)
+			Actuate.tween(spriteElement, 0.5, { y:Config.HEIGHT / 2 }, true).ease(Elastic.easeInOut).onComplete(createResizer);
+			
 			layerObject.graphics.clear();
 			spriteElement.y = handler.y;
 			challenge.hiddenElement.distance = getDistanceFromPosition(spriteElement.x);
 			spriteElement.addEventListener(MouseEvent.MOUSE_DOWN, onElementMouseDown);
 
+
 		}
 		
+		private function createResizer():void {
+			adjustCC();
+			try {
+				layerResizer.removeChildAt(0);	
+			} catch (e:Error) {
+				
+			}
+			
+			if (spriteElement is SpriteArrowImage) {
+				var s:Sprite = new Sprite();
+				s.graphics.beginFill(0, 0);
+				s.graphics.drawRect( -16,-16,31, 31);
+				
+				s.graphics.beginFill(0x0000A0);				
+				s.graphics.drawRect( -2, -2, 5, 5);
+				layerResizer.addChild(s);
+				s.name = "resizer"
+				s.y = spriteElement.y - spriteElement.height - 5;
+				//s.alpha = 0;
+				s.x = spriteElement.x;
+				
+				s.addEventListener(MouseEvent.MOUSE_OVER, onImageResizeOver);
+				s.addEventListener(MouseEvent.MOUSE_OUT, onImageResizeOut);
+				s.addEventListener(MouseEvent.MOUSE_DOWN, onImageResizerMouseDown);
+			}			
+		}
+		
+		private var ypos_mouse:int = 0;
+		private var ypos_img:int = 0;
+		private function onImageResizerMouseDown(e:MouseEvent):void 
+		{
+			ypos_mouse = mouseY;
+			ypos_img = e.target.y;
+			Sprite(e.target).addEventListener(Event.ENTER_FRAME, onImageResizerEnterFrame)
+			stage.addEventListener(MouseEvent.MOUSE_UP, onImageResizerMouseUp)
+		}
+		
+		private function onImageResizerMouseUp(e:MouseEvent):void 
+		{
+			layerResizer.getChildByName("resizer").removeEventListener(Event.ENTER_FRAME, onImageResizerEnterFrame)
+			stage.removeEventListener(MouseEvent.MOUSE_UP, onImageResizerMouseUp)			
+		}
+		
+		private function onImageResizerEnterFrame(e:Event):void 
+		{
+				e.target.y = (ypos_img + (mouseY - ypos_mouse));
+				var alt:int = (Config.HEIGHT/2 - e.target.y) - 5 * (e.target.y>Config.HEIGHT/2?-1:1);
+				var r:Number = alt / object.height;
+				spriteElement.scaleY = alt / object.height
+				spriteElement.scaleX = alt/ object.height
+				var sz:Number = challenge.object.size / r;
+				trace(alt);
+				trace(challenge.object.size, challenge.image.size, sz);
+				challenge.hiddenElement.size = sz;
+				challenge.hiddenElement.inverted = (alt < 0);
+				
+				
+				
+		}
+		
+		private var intoresizer:Boolean = false;
+		private function onImageResizeOver(e:MouseEvent):void 
+		{
+			if (intoresizer == true) return;
+			intoresizer = true;
+			Actuate.tween(e.target, 1, { alpha:1 }, true);
+			
+		}
+
+		private function onImageResizeOut(e:MouseEvent):void 
+		{
+			if (intoresizer == false) return;
+			intoresizer = false;
+			Actuate.tween(e.target, 1, { alpha:0.03 }, true);
+			
+		}		
 		private function onElementMouseDown(e:MouseEvent):void 
 		{
 			stage.addEventListener(MouseEvent.MOUSE_UP, onElementMouseUp)
@@ -178,18 +284,28 @@ package view
 		private function onElementMove(e:Event):void 
 		{
 			spriteElement.x = mouseX;
-			challenge.hiddenElement.inverted = (mouseX > Config.HEIGHT / 2);				
-			if (challenge.hiddenElement.inverted) {
-				spriteElement.rotationY = 180
-			} else {
-				spriteElement.rotationY = 0;
-			}
+			if(layerResizer.getChildByName("resizer")!=null) layerResizer.getChildByName("resizer").x = mouseX;
+			adjustCC()
+			//challenge.hiddenElement.inverted = (mouseY > Config.HEIGHT / 2);				
+			//if (challenge.hiddenElement.inverted) {
+//				spriteElement.rotationX = 180
+			//} else {
+//				spriteElement.rotationX = 0;
+			//}
+		}
+		
+		private function adjustCC():void 
+		{
+			if (challenge.element is Focus) {
+				spriteElement.getChildByName("cc").x = spriteElement.globalToLocal(new Point(spriteElement.x - (mirror.x - spriteElement.x), 0)).x;				
+			}			
 		}
 		
 		private function onElementMouseUp(e:MouseEvent):void 
 		{
 			spriteElement.removeEventListener(Event.ENTER_FRAME, onElementMove);
 			challenge.hiddenElement.distance = getDistanceFromPosition(spriteElement.x);
+			
 			
 		}
 		

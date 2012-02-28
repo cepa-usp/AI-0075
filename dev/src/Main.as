@@ -29,6 +29,7 @@ package
 		private var challenge:Challenge;
 		private var btGetLine:Sprite;
 		private var btGetElement:Sprite;
+		private var btEvaluate:Sprite;
 		
 		
 		public function Main():void 
@@ -46,7 +47,22 @@ package
 			bt.y = 20;			
 			bt.addEventListener(MouseEvent.CLICK, performReset)
 			sprButtons.addChild(bt);
+			
+			btEvaluate = new Sprite();
+			btEvaluate.graphics.beginFill(0x008000);
+			btEvaluate.graphics.drawRect(0, 0, 50, 20);
+			btEvaluate.x = 60;
+			btEvaluate.y = 20;			
+			btEvaluate.addEventListener(MouseEvent.CLICK, evaluate)
+			sprButtons.addChild(btEvaluate);
 		}
+		
+		private function evaluate(e:MouseEvent):void 
+		{
+			challenge.evaluate();
+		}
+		
+		
 		
 
 		

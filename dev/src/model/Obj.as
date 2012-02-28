@@ -16,6 +16,19 @@ package model
 			
 		}
 		
+		
+		public function clone():ChallengeElement 
+		{
+			var f:Obj = new Obj();
+			f.distance = distance;
+			f.inverted = inverted;
+			f.size = size;
+			f.image = image;
+			return f;
+		}
+		
+
+		
 		public function get distance():Number 
 		{
 			return _distance;
