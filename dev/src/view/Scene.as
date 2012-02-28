@@ -1,12 +1,18 @@
 package view 
 {
+	import com.eclecticdesignstudio.motion.Actuate;
+	import com.eclecticdesignstudio.motion.easing.Elastic;
 	import fl.motion.ITween;
+	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
+	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	import model.Challenge;
 	import model.ChallengeElement;
 	import model.Mirror;
+	import view.DragHandler;
 	
 	/**
 	 * ...
@@ -17,13 +23,12 @@ package view
 		
 		private var layerLines:Sprite = new Sprite();
 		private var _layerObject:Sprite = new Sprite();
-		
-		
 		private var layerChallenge:Sprite = new Sprite();
 		private var _mirror:Sprite;
 		private var image:SpriteArrow;
 		private var object:SpriteArrow;
 		private var focus:SpriteDot;
+		private var spriteElement:Sprite;
 		private var center:SpriteDot;
 		private var element:ChallengeElement;
 		private var _scale:Number = 0;
@@ -148,10 +153,48 @@ package view
 			layerObject.addChild(dh);
 			dh.addEventListener("PositionChanged", onHandlerChanged);
 		}
+
 		
-		public function setElementAtPosition():void {
+		public function receiveElement(handler:DragHandler):void 
+		{
+			//removeChild(handler);
+			spriteElement = Sprite(DragHandler(handler).getIcon());
+			addChild(spriteElement);
+			spriteElement.x = handler.x;
+			Actuate.tween(spriteElement, 0.5, {y:Config.HEIGHT/2}, true).ease(Elastic.easeInOut)
+			layerObject.graphics.clear();
+			spriteElement.y = handler.y;
+			challenge.hiddenElement.distance = getDistanceFromPosition(spriteElement.x);
+			spriteElement.addEventListener(MouseEvent.MOUSE_DOWN, onElementMouseDown);
+
+		}
+		
+		private function onElementMouseDown(e:MouseEvent):void 
+		{
+			stage.addEventListener(MouseEvent.MOUSE_UP, onElementMouseUp)
+			spriteElement.addEventListener(Event.ENTER_FRAME, onElementMove);
+		}
+		
+		private function onElementMove(e:Event):void 
+		{
+			spriteElement.x = mouseX;
+			challenge.hiddenElement.inverted = (mouseX > Config.HEIGHT / 2);				
+			if (challenge.hiddenElement.inverted) {
+				spriteElement.rotationY = 180
+			} else {
+				spriteElement.rotationY = 0;
+			}
+		}
+		
+		private function onElementMouseUp(e:MouseEvent):void 
+		{
+			spriteElement.removeEventListener(Event.ENTER_FRAME, onElementMove);
+			challenge.hiddenElement.distance = getDistanceFromPosition(spriteElement.x);
 			
 		}
+		
+		
+		
 		
 		private function onHandlerChanged(e:Event):void 
 		{
@@ -160,18 +203,17 @@ package view
 			layerObject.graphics.lineStyle(1, 0x008080, 0.8);
 			layerObject.graphics.moveTo(dh.x, dh.y);
 			layerObject.graphics.lineTo(dh.x, Config.HEIGHT / 2);
-			getDistanceFromPosition(dh.x);
+			
 			
 		}
 		
 		
-		private function getDistanceFromPosition(x:Number):Number {
+		public function getDistanceFromPosition(x:Number):Number {
 			
 			var dMin:Number = Math.min(image.x, object.x, focus.x, center.x, mirror.x);
 			var margin:int = 150;
 			var xMirror:Number = mirror.x;
-			var d:Number =  (x + dMin + margin - xMirror)
-			trace(d)
+			var d:Number =  scale * (x + dMin - margin - xMirror)
 			return d;
 		}		
 				

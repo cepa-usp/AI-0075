@@ -201,7 +201,10 @@ package
 		private function onFinishElementDrag(e:Event):void 
 		{
 			var posx:int = DragHandler(e.target).x;
-			challenge.hiddenElement.distance = posx;
+			challenge.hiddenElement.distance 
+			scene.receiveElement(DragHandler(e.target))
+			
+			
 		}
 				
 		private function showAnswerTools():void 
@@ -216,7 +219,7 @@ package
 		
 		
 		
-		private function changeChallengeState() {
+		private function changeChallengeState():void {
 			
 		}
 		

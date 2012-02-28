@@ -14,6 +14,18 @@ package model
 			
 		}
 		
+		/* INTERFACE model.ChallengeElement */
+		
+		public function get inverted():Boolean 
+		{
+				return false;
+		}
+		
+		public function set inverted(value:Boolean):void 
+		{
+			
+		}
+		
 		public function get distance():Number 
 		{
 			return _distance;

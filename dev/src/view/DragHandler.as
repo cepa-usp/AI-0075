@@ -11,14 +11,22 @@ package view
 	 */
 	public class DragHandler extends Sprite
 	{
+		private var icon:DisplayObject = null;
+		
 		public function DragHandler() 
 		{
 		
 		}
 		
 		public function setIcon(d:DisplayObject):void {
-			addChild(d);
+			icon = d;      
+			addChild(d);   
 		}
+				
+		public function getIcon():DisplayObject {
+			return icon;
+		}		
+		
 		
 		public function init():void {
 			stage.addEventListener(MouseEvent.MOUSE_UP, release)
@@ -26,7 +34,7 @@ package view
 			this.startDrag(true);
 		}
 		
-		public function onMove(e:Event) {
+		public function onMove(e:Event):void {
 			dispatchEvent(new Event("PositionChanged", true));
 		}
 		

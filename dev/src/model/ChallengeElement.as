@@ -9,6 +9,8 @@ package model
 	{
 		function get distance():Number;
 		function set distance(value:Number):void;
+		function get inverted():Boolean;
+		function set inverted(value:Boolean):void;
 	}
 	
 }
