@@ -94,8 +94,8 @@ package model
 			var sentido:Number = 100;
 			var tamanho:Number = 100;
 						
-			if (hiddenElement.distance <  element.distance + 2*(element.distance/10) && hiddenElement.distance > element.distance - 2*(element.distance/10)) distancia = 80;
-			if (hiddenElement.distance <  element.distance + element.distance/10 && hiddenElement.distance > element.distance - element.distance/10) distancia = 100;
+			if (Math.abs(hiddenElement.distance) <  Math.abs(element.distance) + 2*(Math.abs(element.distance)/10) && Math.abs(hiddenElement.distance) > Math.abs(element.distance) - 2*(Math.abs(element.distance)/10)) distancia = 80;
+			if (Math.abs(hiddenElement.distance) <  Math.abs(element.distance) + (Math.abs(element.distance)/10) && Math.abs(hiddenElement.distance) > Math.abs(element.distance) - (Math.abs(element.distance)/10)) distancia = 100;
 			
 			
 			
@@ -112,7 +112,8 @@ package model
 			}
 			
 			score = Math.min(distancia, tamanho, sentido);
-			trace(distancia, tamanho, sentido, score);
+			state = CHALLENGESTATUS_SHOWANSWER;
+			//trace(distancia, tamanho, sentido, score);
 			
 			
 		}

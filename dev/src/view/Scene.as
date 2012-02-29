@@ -28,15 +28,15 @@ package view
 		private var layerChallenge:Sprite = new Sprite();
 		private var layerResizer:Sprite = new Sprite();
 		private var _mirror:Sprite;
-		private var image:SpriteArrow;
-		private var object:SpriteArrow;
+		private var image:Seta;
+		private var object:Seta;
 		private var focus:SpriteDot;
 		private var spriteElement:Sprite;
 		private var center:SpriteDot;
 		private var element:ChallengeElement;
 		private var _scale:Number = 0;
 		private var challenge:Challenge;
-		
+		private var answerElement:Sprite;
 		public function Scene() 
 		{
 			
@@ -57,17 +57,23 @@ package view
 		}
 		
 		public function hideElement():void {
-			return;
+			//return;
 			if (challenge.element == challenge.image) {
 				this.image.alpha = 0;
+				answerElement = this.image;
 			}
 			if (challenge.element == challenge.object) {
 				this.object.alpha = 0;
+				answerElement = this.object;
 			}
 			if (challenge.element == challenge.mirror.focus) {
 				this.focus.alpha = 0;
+				this.center.alpha = 0;
+				answerElement = this.focus;
 			}			
 		}
+
+		
 		
 		public function calculateScaleFactor(challenge:Challenge):void {
 			var minVal:Number = 9999999;
@@ -128,12 +134,12 @@ package view
 		
 		private function drawObject(challenge:Challenge):void 
 		{
-			object = new SpriteArrow();			
+			object = new Seta();			
 			addChild(object);
 			object.x = mirror.x + (challenge.object.distance / scale);
 			object.y = Config.HEIGHT / 2;
 			
-			image = new SpriteArrow();			
+			image = new Seta();			
 			addChild(image);
 			image.x = mirror.x + (challenge.image.distance / scale);
 			
@@ -207,7 +213,7 @@ package view
 				
 			}
 			
-			if (spriteElement is SpriteArrowImage) {
+			if (spriteElement is Seta && Obj(challenge.element).image) {
 				var s:Sprite = new Sprite();
 				s.graphics.beginFill(0, 0);
 				s.graphics.drawRect( -16,-16,31, 31);
@@ -249,7 +255,7 @@ package view
 				var r:Number = alt / object.height;
 				spriteElement.scaleY = alt / object.height
 				spriteElement.scaleX = alt/ object.height
-				var sz:Number = challenge.object.size / r;
+				var sz:Number = challenge.object.size * r;
 				trace(alt);
 				trace(challenge.object.size, challenge.image.size, sz);
 				challenge.hiddenElement.size = sz;
@@ -332,6 +338,24 @@ package view
 			var d:Number =  scale * (x + dMin - margin - xMirror)
 			return d;
 		}		
+		
+		public function showAnswer(viewAnswer:Boolean):void 
+		{
+			if (viewAnswer) {
+				Actuate.tween(spriteElement, 1, { alpha:0 } ) ;
+				Actuate.tween(answerElement, 1, { alpha:1 } ) ;	
+				if (challenge.element == challenge.mirror.focus) {				
+					Actuate.tween(center, 1, { alpha:1 } ) ;
+				}
+			} else {
+				Actuate.tween(spriteElement, 1, { alpha:1 } ) ;
+				Actuate.tween(answerElement, 1, { alpha:0 } ) ;	
+				if (challenge.element == challenge.mirror.focus) {				
+					Actuate.tween(center, 1, { alpha:0 } ) ;
+				}				
+			}
+			
+		}
 				
 		public function set mirror(value:Sprite):void 
 		{

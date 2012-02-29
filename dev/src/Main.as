@@ -30,6 +30,8 @@ package
 		private var btGetLine:Sprite;
 		private var btGetElement:Sprite;
 		private var btEvaluate:Sprite;
+		private var btShowAnswer:Sprite;
+		private var viewAnswer:Boolean = false;
 		
 		
 		public function Main():void 
@@ -51,10 +53,28 @@ package
 			btEvaluate = new Sprite();
 			btEvaluate.graphics.beginFill(0x008000);
 			btEvaluate.graphics.drawRect(0, 0, 50, 20);
-			btEvaluate.x = 60;
+			btEvaluate.x = 80;
 			btEvaluate.y = 20;			
 			btEvaluate.addEventListener(MouseEvent.CLICK, evaluate)
 			sprButtons.addChild(btEvaluate);
+			
+			btShowAnswer = new Sprite();
+			btShowAnswer.graphics.beginFill(0x008000);
+			btShowAnswer.graphics.drawRect(0, 0, 50, 20);
+			btShowAnswer.x = 80;
+			btShowAnswer.y = 50;			
+			btShowAnswer.addEventListener(MouseEvent.CLICK, showAnswer)
+			sprButtons.addChild(btShowAnswer);
+		}
+		
+		private function showAnswer(e:MouseEvent):void 
+		{
+			if (viewAnswer == false) {
+				viewAnswer = true;				
+			} else {
+				viewAnswer = false;
+			}
+			scene.showAnswer(viewAnswer);
 		}
 		
 		private function evaluate(e:MouseEvent):void 
@@ -159,6 +179,7 @@ package
 		private function hideTools():void 
 		{
 			Actuate.tween(layerTools, 1, { alpha:0 }, true);
+			btShowAnswer.visible = false;
 		}
 		
 		private function showTools():void 
@@ -205,9 +226,9 @@ package
 			if (challenge.hiddenElement is Focus) dh.setIcon(new SpriteDot());
 			if (challenge.hiddenElement is Obj) {
 				if (Obj(challenge.hiddenElement).image) {
-					dh.setIcon(new SpriteArrowImage());
+					dh.setIcon(new Seta());
 				} else {
-					dh.setIcon(new SpriteArrow());
+					dh.setIcon(new Seta());
 				}
 			}
 
@@ -225,7 +246,7 @@ package
 				
 		private function showAnswerTools():void 
 		{
-			
+				btShowAnswer.visible = true;
 		}
 		
 		private function computeScore():void 
