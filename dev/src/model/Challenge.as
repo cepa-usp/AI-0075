@@ -15,6 +15,8 @@ package model
 		private var _image:Obj;
 		private var _state:int = 0;
 		private var _hiddenElement:ChallengeElement;
+		private var _element:ChallengeElement;
+		private var _score:Number = 0;
 		
 		
 		public function Challenge() 
@@ -23,7 +25,7 @@ package model
 		}
 		
 		public function createChallenge(focusDistance:Number=Number.NaN, objectDistance:Number=Number.NaN, objectSize:Number=Number.NaN, mirrorType:int=-1):void {
-
+			this.state = CHALLENGESTATUS_CREATING;
 			mirror = new Mirror();
 			if(mirrorType==-1){
 				mirror.type = Math.floor(Math.random() * 2);
@@ -55,7 +57,8 @@ package model
 			}
 			
 			
-			image = new Obj();			
+			image = new Obj();		
+			image.image = true;
 			image.distance = 1 / ((1 / mirror.focus.distance) - (1 / object.distance));
 			
 			image.size = ((image.distance * -1) * object.size) / object.distance;
@@ -69,16 +72,50 @@ package model
 			
 			var rnd:int = Math.floor(Math.random() * 3);
 			switch(rnd) {
+				case 0:
+					hiddenElement = object.clone();
+					element = object;
+					break;
 				case 1:
-					hiddenElement = object;
+					hiddenElement = image.clone();
+					element = image;
 					break;
 				case 2:
-					hiddenElement = image;
-					break;
-				case 3:
-					hiddenElement = mirror.focus;
+					hiddenElement = mirror.focus.clone();
+					element = mirror.focus;
 					break;
 			}
+			this.state = CHALLENGESTATUS_WAITINGPOSITION;
+		}
+		
+		public function evaluate():void {
+			state = CHALLENGESTATUS_EVALUATING;
+			var distancia:Number = 0;
+			var sentido:Number = 100;
+			var tamanho:Number = 100;
+						
+			if (Math.abs(hiddenElement.distance) <  Math.abs(element.distance) + 2*(Math.abs(element.distance)/10) && Math.abs(hiddenElement.distance) > Math.abs(element.distance) - 2*(Math.abs(element.distance)/10)) distancia = 80;
+			if (Math.abs(hiddenElement.distance) <  Math.abs(element.distance) + (Math.abs(element.distance)/10) && Math.abs(hiddenElement.distance) > Math.abs(element.distance) - (Math.abs(element.distance)/10)) distancia = 100;
+			
+			
+			
+			if (element is Obj) {
+				if (Obj(element).image == true) {
+					tamanho = 0;
+					if (hiddenElement.size <  element.size + 2*(element.size/10) && hiddenElement.size> element.size - 2*(element.size/10)) tamanho = 80;
+					if (hiddenElement.size <  element.size + element.size/10 && hiddenElement.size > element.size - element.size/10) tamanho = 100;
+					
+				
+					sentido = 0;
+					if (hiddenElement.inverted == element.inverted) sentido = 100;					
+				}
+			}
+			
+			score = Math.min(distancia, tamanho, sentido);
+			state = CHALLENGESTATUS_SHOWANSWER;
+			//trace(distancia, tamanho, sentido, score);
+			
+			
 		}
 		
 		public function get mirror():Mirror 
@@ -139,6 +176,27 @@ package model
 		public function set state(value:int):void 
 		{
 			_state = value;
+			eventDispatcher.dispatchEvent(new ChallengeEvent(ChallengeEvent.STATE_CHANGE, true));
+		}
+		
+		public function get element():ChallengeElement 
+		{
+			return _element;
+		}
+		
+		public function set element(value:ChallengeElement):void 
+		{
+			_element = value;
+		}
+		
+		public function get score():Number 
+		{
+			return _score;
+		}
+		
+		public function set score(value:Number):void 
+		{
+			_score = value;
 		}
 		
 		public function toString():String {
@@ -153,10 +211,11 @@ package model
 		}
 		
 		
-		public static const CHALLENGESTATUS_CREATING = 1;
-		public static const CHALLENGESTATUS_WAITINGANSWER = 2;
-		public static const CHALLENGESTATUS_EVALUATING = 3;
-		public static const CHALLENGESTATUS_SHOWANSWER = 4;		
+		public static const CHALLENGESTATUS_CREATING:int = 1;
+		public static const CHALLENGESTATUS_WAITINGPOSITION:int = 2;
+		public static const CHALLENGESTATUS_WAITINGANSWER:int = 3;
+		public static const CHALLENGESTATUS_EVALUATING:int = 4;
+		public static const CHALLENGESTATUS_SHOWANSWER:int = 5;		
 		
 		
 		

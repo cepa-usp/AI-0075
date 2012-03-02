@@ -1,12 +1,15 @@
 package 
 {
+	import com.eclecticdesignstudio.motion.Actuate;
 	import flash.display.SimpleButton;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import model.Challenge;
 	import model.ChallengeEvent;
+	import model.Focus;
 	import model.Mirror;
+	import model.Obj;
 	import view.DragHandler;
 	import view.Line;
 	import view.Scene;
@@ -22,6 +25,13 @@ package
 		private var scene:Scene = null;
 		private var sprScene:Sprite = new Sprite();
 		private var sprButtons:Sprite = new Sprite();
+		private var layerTools:Sprite  = new Sprite();
+		private var challenge:Challenge;
+		private var btGetLine:Sprite;
+		private var btGetElement:Sprite;
+		private var btEvaluate:Sprite;
+		private var btShowAnswer:Sprite;
+		private var viewAnswer:Boolean = false;
 		
 		
 		public function Main():void 
@@ -40,17 +50,44 @@ package
 			bt.addEventListener(MouseEvent.CLICK, performReset)
 			sprButtons.addChild(bt);
 			
-			var bt2:Sprite = new Sprite();
-			bt2.graphics.beginFill(0x008000);
-			bt2.graphics.drawRect(0, 0, 50, 20);
-			bt2.x = 10;
-			bt2.y = 50;						
-			bt2.addEventListener(MouseEvent.MOUSE_DOWN, createLine)
-			sprButtons.addChild(bt2);		
+			btEvaluate = new Sprite();
+			btEvaluate.graphics.beginFill(0x008000);
+			btEvaluate.graphics.drawRect(0, 0, 50, 20);
+			btEvaluate.x = 80;
+			btEvaluate.y = 20;			
+			btEvaluate.addEventListener(MouseEvent.CLICK, evaluate)
+			sprButtons.addChild(btEvaluate);
 			
-			
+			btShowAnswer = new Sprite();
+			btShowAnswer.graphics.beginFill(0x008000);
+			btShowAnswer.graphics.drawRect(0, 0, 50, 20);
+			btShowAnswer.x = 80;
+			btShowAnswer.y = 50;			
+			btShowAnswer.addEventListener(MouseEvent.CLICK, showAnswer)
+			sprButtons.addChild(btShowAnswer);
 		}
 		
+		private function showAnswer(e:MouseEvent):void 
+		{
+			if (viewAnswer == false) {
+				viewAnswer = true;				
+			} else {
+				viewAnswer = false;
+			}
+			scene.showAnswer(viewAnswer);
+		}
+		
+		private function evaluate(e:MouseEvent):void 
+		{
+			challenge.evaluate();
+		}
+		
+		
+		
+
+		
+		
+
 		private function createLine(e:MouseEvent):void 
 		{
 			var dh:DragHandler = new DragHandler();
@@ -110,7 +147,7 @@ package
 		
 		private function startChallenge():void {
 			reset();
-			var challenge:Challenge = new Challenge();
+			challenge = new Challenge();
 			challenge.eventDispatcher.addEventListener(ChallengeEvent.STATE_CHANGE, onChallengeStateChange);
 			challenge.createChallenge();
 			scene.draw(challenge);			
@@ -118,14 +155,16 @@ package
 		
 		private function onChallengeStateChange(e:ChallengeEvent):void 
 		{
-			var c:Challenge = e.challenge;
-			switch (c.state) {
+			switch (challenge.state) {
 				case Challenge.CHALLENGESTATUS_CREATING:
 					hideTools()
 					break;
-				case Challenge.CHALLENGESTATUS_WAITINGANSWER:
+				case Challenge.CHALLENGESTATUS_WAITINGPOSITION:
 					showTools();
 					break;
+				case Challenge.CHALLENGESTATUS_WAITINGANSWER:
+					btGetElement.removeEventListener(MouseEvent.MOUSE_DOWN, createElement)
+					break;					
 				case Challenge.CHALLENGESTATUS_EVALUATING:
 					hideTools()
 					break;
@@ -139,17 +178,75 @@ package
 		
 		private function hideTools():void 
 		{
-			
+			Actuate.tween(layerTools, 1, { alpha:0 }, true);
+			btShowAnswer.visible = false;
 		}
 		
 		private function showTools():void 
 		{
+			drawTools();
+			Actuate.tween(layerTools, 1, { alpha:1 }, true);			
+		}
+		
+		public function drawTools():void {
+			//layerTools = new Sprite();
+			
+			btGetLine = new Sprite();
+			btGetLine.graphics.beginFill(0x008000);
+			btGetLine.graphics.drawRect(0, 0, 50, 20);
+			btGetLine.x = 10;
+			btGetLine.y = 50;						
+			btGetLine.addEventListener(MouseEvent.MOUSE_DOWN, createLine)
+			layerTools.addChild(btGetLine);
+			
+			
+			if (challenge.hiddenElement is Focus) btGetElement = new DragFocus();
+			if (challenge.hiddenElement is Obj) {
+				if (Obj(challenge.hiddenElement).image) {
+					btGetElement = new DragImage();
+				} else {
+					btGetElement = new DragObject();
+				}
+			}
+			btGetElement.x = 30;
+			btGetElement.y = 100;
+			btGetElement.addEventListener(MouseEvent.MOUSE_DOWN, createElement)
+			layerTools.addChild(btGetElement);
 			
 		}
 		
+
+		
+		
+		private function createElement(e:MouseEvent):void 
+		{
+			var dh:DragHandler = new DragHandler();
+			dh.addEventListener(Event.COMPLETE, onFinishElementDrag)
+			scene.addGhostElement(dh);
+			if (challenge.hiddenElement is Focus) dh.setIcon(new SpriteDot());
+			if (challenge.hiddenElement is Obj) {
+				if (Obj(challenge.hiddenElement).image) {
+					dh.setIcon(new Seta());
+				} else {
+					dh.setIcon(new Seta());
+				}
+			}
+
+			dh.init();			
+		}
+		
+		private function onFinishElementDrag(e:Event):void 
+		{
+			var posx:int = DragHandler(e.target).x;
+			challenge.hiddenElement.distance 
+			scene.receiveElement(DragHandler(e.target))
+			
+			
+		}
+				
 		private function showAnswerTools():void 
 		{
-			
+				btShowAnswer.visible = true;
 		}
 		
 		private function computeScore():void 
@@ -159,15 +256,17 @@ package
 		
 		
 		
-		private function changeChallengeState() {
+		private function changeChallengeState():void {
 			
 		}
 		
 		private function init(e:Event = null):void 
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
-			addChild(sprScene);
+			
 			addChild(sprButtons);
+			addChild(layerTools);
+			addChild(sprScene);
 			drawButtons();
 			changeState(1);
 		}

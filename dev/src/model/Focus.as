@@ -14,6 +14,39 @@ package model
 			
 		}
 		
+		/* INTERFACE model.ChallengeElement */
+		
+		public function clone():ChallengeElement 
+		{
+			var f:Focus = new Focus();
+			f.distance = distance;
+			return f;
+		}
+		
+		/* INTERFACE model.ChallengeElement */
+		
+		public function get size():Number 
+		{
+			return 0;
+		}
+		
+		public function set size(value:Number):void 
+		{
+			
+		}
+		
+
+		
+		public function get inverted():Boolean 
+		{
+				return false;
+		}
+		
+		public function set inverted(value:Boolean):void 
+		{
+			
+		}
+		
 		public function get distance():Number 
 		{
 			return _distance;
