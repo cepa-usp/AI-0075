@@ -7,6 +7,9 @@ package
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.filters.DropShadowFilter;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
 	import model.Challenge;
 	import model.ChallengeEvent;
 	import model.Focus;
@@ -28,14 +31,19 @@ package
 		private var sprScene:Sprite = new Sprite();
 		private var sprButtons:Sprite = new Sprite();
 		private var layerTools:Sprite  = new Sprite();
+		private var sprLabel:Sprite = new Sprite();
+		private var sprAnswer:Sprite = new Sprite();
 		private var challenge:Challenge;
 		private var btGetLine:Sprite;
+		private var btNovo:Sprite;
 		private var btGetElement:Sprite;
 		private var btEvaluate:Sprite;
-		private var btShowAnswer:Sprite;
+		private var btShowAnswer1:Sprite;
+		private var btShowAnswer2:Sprite;
 		private var viewAnswer:Boolean = false;
 		private var screenOptions:ScreenOptions;
 		private var botoes:Botoes;
+		private var scorm:ScormComm = new ScormComm();
 		
 		
 		public function Main():void 
@@ -55,23 +63,45 @@ package
 			workAsButton(botoes.btReset);
 			workAsButton(botoes.btTutorial);			
 			botoes.btReset.addEventListener(MouseEvent.CLICK, performReset);
+			botoes.filters = [new DropShadowFilter(4, 45, 0, 1)]
 
 		}
 		
 		public function drawButtons():void {
 			drawButtonMenu();			
 			addScreenOptions();
-
-			
-			btShowAnswer = new Sprite();
-			btShowAnswer.graphics.beginFill(0x008000);
-			btShowAnswer.graphics.drawRect(0, 0, 50, 20);
-			btShowAnswer.x = 80;
-			btShowAnswer.y = 50;			
-			btShowAnswer.addEventListener(MouseEvent.CLICK, showAnswer)
-			sprButtons.addChild(btShowAnswer);
+			drawAnswer();
 		}
 		
+		public function drawAnswer():void {
+			btShowAnswer1 = new BtRespostaCorreta();
+			btShowAnswer2 = new BtSuaResposta();
+			btNovo = new BtNovo();
+			sprAnswer.addChild(btShowAnswer1);
+			sprAnswer.addChild(btShowAnswer2);
+			sprAnswer.addChild(btNovo);
+			workAsButton(btShowAnswer1);
+			workAsButton(btShowAnswer2);
+			workAsButton(btNovo);
+			btShowAnswer1.x = Config.WIDTH/2;
+			btShowAnswer1.y = 100;
+			btShowAnswer2.x = Config.WIDTH/2;
+			btShowAnswer2.y = 100;		
+			btNovo.x = Config.WIDTH/2;
+			btNovo.y = 70;					
+			btShowAnswer1.addEventListener(MouseEvent.CLICK, showAnswer)
+			btShowAnswer2.addEventListener(MouseEvent.CLICK, showAnswer)
+			btNovo.addEventListener(MouseEvent.CLICK, performReset)
+			btShowAnswer1.visible = true;
+			btShowAnswer2.visible = false;
+			sprAnswer.visible = false;
+			
+			
+			
+			
+		}
+		
+
 		private function addScreenOptions():void 
 		{
 			screenOptions = new ScreenOptions();
@@ -113,7 +143,11 @@ package
 				viewAnswer = false;
 			}
 			scene.showAnswer(viewAnswer);
+			btShowAnswer2.visible = viewAnswer;
+			btShowAnswer1.visible = !viewAnswer;
 		}
+
+	
 		
 		private function evaluate(e:MouseEvent):void 
 		{
@@ -142,6 +176,19 @@ package
 			removeChild(DragHandler(e.target));
 		}
 
+		
+		private function getIncogName():String {
+			if (challenge.hiddenElement is Obj) {
+				if (Obj(challenge.hiddenElement).image == true) {
+					return "a imagem"
+				} else {
+					return "o objeto"
+				}
+			} else if (challenge.hiddenElement is Focus) {
+				return "o foco"
+			}
+			return "";
+		}
 		
 		private function performReset(e:MouseEvent):void 
 		{
@@ -195,18 +242,25 @@ package
 		{
 			switch (challenge.state) {
 				case Challenge.CHALLENGESTATUS_CREATING:
+					setMessage("Criando nova situação");
 					hideTools()
+					hideAnswerTools();
 					break;
 				case Challenge.CHALLENGESTATUS_WAITINGPOSITION:
+					setMessage("Peque o elemento da caixa (" + getIncogName() + ") e arraste-o para dentro do cenário.");
 					showTools();
 					break;
 				case Challenge.CHALLENGESTATUS_WAITINGANSWER:
+					setMessage("Arraste " + getIncogName() +  " para a posição correta. Utilize a ferramenta 'linha' para auxiliá-lo. ");
 					btGetElement.removeEventListener(MouseEvent.MOUSE_DOWN, createElement)
 					break;					
 				case Challenge.CHALLENGESTATUS_EVALUATING:
+					setMessage("Avaliando...");
 					hideTools()
+
 					break;
 				case Challenge.CHALLENGESTATUS_SHOWANSWER:
+				
 					computeScore();
 					showAnswerTools();
 					break;					
@@ -267,15 +321,26 @@ package
 			
 			
 		}
-				
+		
+		private function hideAnswerTools():void 
+		{
+			sprAnswer.alpha = 0;
+			sprAnswer.visible = false;
+
+		}		
+		
+
 		private function showAnswerTools():void 
 		{
-				btShowAnswer.visible = true;
+			sprAnswer.visible = true;
+			sprAnswer.alpha = 0;
+			Actuate.tween(sprAnswer, 1, { alpha:1 } );
 		}
 		
 		private function computeScore():void 
 		{
 			
+			setMessage("Resultado: " + challenge.score.toString() + "/100");
 		}
 		
 		
@@ -286,13 +351,36 @@ package
 		
 		private function init(e:Event = null):void 
 		{
-			removeEventListener(Event.ADDED_TO_STAGE, init);
 			
+			removeEventListener(Event.ADDED_TO_STAGE, init);
+			scorm.initLMSConnection(0, 100);
+
 			addChild(sprButtons);
 			addChild(layerTools);
 			addChild(sprScene);
+			addChild(sprLabel);
+			addChild(sprAnswer);
+			
 			drawButtons();
+			drawLabel();
 			changeState(1);
+		}
+		
+		private function drawLabel():void 
+		{
+			sprLabel.x = 0;
+			sprLabel.y = Config.HEIGHT - 30;
+			var tx:TextField = new TextField();
+			tx.name = "text";
+			tx.height = 30;
+			tx.width = Config.WIDTH;
+			sprLabel.addChild(tx);
+			tx.x = 0;
+			tx.y = 0;
+		}
+		
+		private function setMessage(tx:String):void {
+			TextField(sprLabel.getChildByName("text")).text = tx;
 		}
 		
 		

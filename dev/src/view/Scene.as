@@ -201,6 +201,7 @@ package view
 			spriteElement.y = handler.y;
 			challenge.hiddenElement.distance = getDistanceFromPosition(spriteElement.x);
 			spriteElement.addEventListener(MouseEvent.MOUSE_DOWN, onElementMouseDown);
+			challenge.state = Challenge.CHALLENGESTATUS_WAITINGANSWER;
 
 
 		}
