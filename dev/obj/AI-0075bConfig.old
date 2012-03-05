@@ -14,7 +14,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'2/3/2012'</value>
+      <value>'5/3/2012'</value>
     </define>
     <source-path append="true">
       <path-element>C:\Documents and Settings\Arthur Tofani\Desktop\GitHub\AI-0075\dev\src</path-element>
