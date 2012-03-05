@@ -1,6 +1,8 @@
 package 
 {
 	import com.eclecticdesignstudio.motion.Actuate;
+	import flash.display.DisplayObject;
+	import flash.display.MovieClip;
 	import flash.display.SimpleButton;
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -32,6 +34,8 @@ package
 		private var btEvaluate:Sprite;
 		private var btShowAnswer:Sprite;
 		private var viewAnswer:Boolean = false;
+		private var screenOptions:ScreenOptions;
+		private var botoes:Botoes;
 		
 		
 		public function Main():void 
@@ -41,22 +45,23 @@ package
 		}
 		
 		
+		public function drawButtonMenu():void {
+			botoes = new Botoes();
+			botoes.x = Config.WIDTH - botoes.width - 10;
+			botoes.y =   Config.HEIGHT - botoes.height - 10;			
+			addChild(botoes);
+			workAsButton(botoes.btCreditos);
+			workAsButton(botoes.btOrientacoes);
+			workAsButton(botoes.btReset);
+			workAsButton(botoes.btTutorial);			
+			botoes.btReset.addEventListener(MouseEvent.CLICK, performReset);
+
+		}
+		
 		public function drawButtons():void {
-			var bt:Sprite = new Sprite();
-			bt.graphics.beginFill(0x008000);
-			bt.graphics.drawRect(0, 0, 50, 20);
-			bt.x = 10;
-			bt.y = 20;			
-			bt.addEventListener(MouseEvent.CLICK, performReset)
-			sprButtons.addChild(bt);
-			
-			btEvaluate = new Sprite();
-			btEvaluate.graphics.beginFill(0x008000);
-			btEvaluate.graphics.drawRect(0, 0, 50, 20);
-			btEvaluate.x = 80;
-			btEvaluate.y = 20;			
-			btEvaluate.addEventListener(MouseEvent.CLICK, evaluate)
-			sprButtons.addChild(btEvaluate);
+			drawButtonMenu();			
+			addScreenOptions();
+
 			
 			btShowAnswer = new Sprite();
 			btShowAnswer.graphics.beginFill(0x008000);
@@ -65,6 +70,39 @@ package
 			btShowAnswer.y = 50;			
 			btShowAnswer.addEventListener(MouseEvent.CLICK, showAnswer)
 			sprButtons.addChild(btShowAnswer);
+		}
+		
+		private function addScreenOptions():void 
+		{
+			screenOptions = new ScreenOptions();
+			addChild(screenOptions);
+			screenOptions.x = 10;
+			screenOptions.y = 10;
+			workAsButton(screenOptions.btEvaluate);
+			workAsButton(screenOptions.btLines);
+			screenOptions.btLines.addEventListener(MouseEvent.MOUSE_DOWN, createLine);
+			screenOptions.btEvaluate.addEventListener(MouseEvent.CLICK, evaluate);
+		}
+		
+		private function workAsButton(o:DisplayObject):void {
+			if (o is MovieClip) {				
+				MovieClip(o).useHandCursor = true;
+				MovieClip(o).buttonMode = true;
+				MovieClip(o).mouseChildren = false;
+				MovieClip(o).addEventListener(MouseEvent.MOUSE_OVER, buttonOnMouseOver);
+				MovieClip(o).addEventListener(MouseEvent.MOUSE_OUT, buttonOnMouseOut);
+				MovieClip(o).gotoAndStop(1);
+			}
+		}
+		
+		private function buttonOnMouseOut(e:MouseEvent):void 
+		{
+			MovieClip(e.target).gotoAndStop(1);
+		}
+		
+		private function buttonOnMouseOver(e:MouseEvent):void 
+		{
+			MovieClip(e.target).gotoAndStop(5);
 		}
 		
 		private function showAnswer(e:MouseEvent):void 
@@ -178,28 +216,12 @@ package
 		
 		private function hideTools():void 
 		{
-			Actuate.tween(layerTools, 1, { alpha:0 }, true);
-			btShowAnswer.visible = false;
+		Actuate.tween(screenOptions, 1, { alpha:0 }, true);
+			//btShowAnswer.visible = false;
 		}
 		
 		private function showTools():void 
 		{
-			drawTools();
-			Actuate.tween(layerTools, 1, { alpha:1 }, true);			
-		}
-		
-		public function drawTools():void {
-			//layerTools = new Sprite();
-			
-			btGetLine = new Sprite();
-			btGetLine.graphics.beginFill(0x008000);
-			btGetLine.graphics.drawRect(0, 0, 50, 20);
-			btGetLine.x = 10;
-			btGetLine.y = 50;						
-			btGetLine.addEventListener(MouseEvent.MOUSE_DOWN, createLine)
-			layerTools.addChild(btGetLine);
-			
-			
 			if (challenge.hiddenElement is Focus) btGetElement = new DragFocus();
 			if (challenge.hiddenElement is Obj) {
 				if (Obj(challenge.hiddenElement).image) {
@@ -211,11 +233,13 @@ package
 			btGetElement.x = 30;
 			btGetElement.y = 100;
 			btGetElement.addEventListener(MouseEvent.MOUSE_DOWN, createElement)
-			layerTools.addChild(btGetElement);
-			
+			screenOptions.addChild(btGetElement);			
+			btGetElement.x = screenOptions.box.x;// + screenOptions.box.width / 2;
+			btGetElement.y = screenOptions.box.y;// + screenOptions.box.height  / 2;
+			Actuate.tween(screenOptions, 1, { alpha:1 }, true);			
 		}
 		
-
+	
 		
 		
 		private function createElement(e:MouseEvent):void 
