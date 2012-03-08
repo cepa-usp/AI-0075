@@ -1,4 +1,4 @@
-package 
+package tutorial
 {
 	import flash.display.MovieClip;
 	/**

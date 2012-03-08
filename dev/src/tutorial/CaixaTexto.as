@@ -1,4 +1,4 @@
-package 
+package tutorial
 {
 	import flash.display.SimpleButton;
 	import flash.display.Sprite;
@@ -16,14 +16,14 @@ package
 	 */
 	public class CaixaTexto extends Sprite
 	{
-		public static const TOP:String = "top";
-		public static const LEFT:String = "left";
-		public static const RIGHT:String = "right";
-		public static const BOTTON:String = "botton";
+		public static const TOP:int = 1;
+		public static const LEFT:int = 2;
+		public static const RIGHT:int = 3;
+		public static const BOTTOM:int = 4;
 		
-		public static const FIRST:String = "first";
-		public static const CENTER:String = "center";
-		public static const LAST:String = "last";
+		public static const FIRST:int = 1;
+		public static const CENTER:int = 2;
+		public static const LAST:int = 3;
 		
 		private var texto:TextField;
 		private var background:Sprite;
@@ -33,8 +33,8 @@ package
 		private var widthArrow:Number = 10; //Base da flecha
 		private var heightArrow:Number = 15; //comprimento da flecha
 		
-		private var sideForArrow:String = "left";
-		private var alignForArrow:String = "first";
+		private var sideForArrow:int = 2;
+		private var alignForArrow:int = 1;
 		
 		private var distanceToObject:Number = 10;
 		private var actualPosition:Point = new Point();
@@ -78,7 +78,7 @@ package
 		private function addListener(e:Event):void 
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, addListener);
-			stage.addEventListener(MouseEvent.MOUSE_DOWN, clickHandler);
+			//stage.addEventListener(MouseEvent.MOUSE_DOWN, clickHandler);
 		}
 		
 		private function clickHandler(e:MouseEvent):void 
@@ -99,7 +99,7 @@ package
 			}
 		}
 		
-		public function setText(text:*, side:String = null, align:String = null, width:Number = 200):void
+		public function setText(text:*, side:int = CaixaTexto.LEFT, align:int = CaixaTexto.FIRST, width:Number = 200):void
 		{
 			this.textArray = null;
 			texto.text = "";
@@ -137,8 +137,8 @@ package
 			}
 			
 			currentWidth = width;
-			if(side != null) sideForArrow = side;
-			if(align != null) alignForArrow = align;
+			sideForArrow = side;
+			alignForArrow = align;
 			drawBackground(texto.textWidth, texto.textHeight);
 			posicionaNextButton();
 			setPosition(actualPosition.x, actualPosition.y);
@@ -197,7 +197,7 @@ package
 						this.y = y - background.height + marginText + widthArrow / 2;
 					}
 					break;
-				case BOTTON:
+				case BOTTOM:
 					this.y = y - background.height - distanceToObject;
 					if (alignForArrow == FIRST) {
 						this.x = x - marginText - widthArrow / 2;
@@ -284,7 +284,7 @@ package
 				background.graphics.lineTo(marginText + w, 2 * marginText + h);
 			}
 			
-			if (sideForArrow != BOTTON) background.graphics.lineTo(marginText, 2 * marginText + h);
+			if (sideForArrow != BOTTOM) background.graphics.lineTo(marginText, 2 * marginText + h);
 			else {
 				switch(alignForArrow) {
 					case FIRST:
@@ -353,9 +353,9 @@ package
 			_roundCorner = value;
 		}
 		
-		public function setSideAlign(side:String, align:String):void
+		public function setSideAlign(side:int, align:int):void
 		{
-			if (side != TOP || side != LEFT || side != RIGHT || side != BOTTON || align != FIRST || align != CENTER || align != LAST) return;
+			if (side != TOP || side != LEFT || side != RIGHT || side != BOTTOM || align != FIRST || align != CENTER || align != LAST) return;
 			
 			this.sideForArrow = side;
 			this.alignForArrow = align;

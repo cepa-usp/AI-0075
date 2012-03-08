@@ -16,6 +16,8 @@ package
 	import model.Focus;
 	import model.Mirror;
 	import model.Obj;
+	import tutorial.CaixaTexto;
+	import tutorial.Tutorial;
 	import view.DragHandler;
 	import view.Line;
 	import view.Scene;
@@ -242,13 +244,7 @@ package
 		}
 		
 		
-		private function startTutorial():void {
-			reset()
-			var challenge:Challenge = new Challenge();
-			challenge.createChallenge(87, 253, 41, Mirror.CONVEX);
-			scene.draw(challenge);
-		}
-		
+
 		private function startChallenge():void {
 			reset();
 			challenge = new Challenge();
@@ -379,8 +375,19 @@ package
 		}
 		
 		
-		
-		private function changeChallengeState():void {
+
+		private function startTutorial():void {
+			reset()
+			var challenge:Challenge = new Challenge();
+			challenge.createChallenge(87, 253, 41, Mirror.CONVEX);
+			scene.draw(challenge);
+			
+			var tut:Tutorial = new Tutorial();
+
+			tut.adicionarBalao("teste1", new Point(30, 30), CaixaTexto.LEFT, CaixaTexto.FIRST);
+			tut.adicionarBalao("teste2", new Point(66, 130), CaixaTexto.RIGHT, CaixaTexto.CENTER);
+			tut.adicionarBalao("teste1", new Point(30, 30), CaixaTexto.LEFT, CaixaTexto.FIRST);
+			tut.iniciar(stage);
 			
 		}
 		
@@ -413,9 +420,10 @@ package
 			sprAboutScreen.visible = false;
 			sprInfoScreen.visible = false;
 			addChild(new LOBorder());
-			iniciaTutorial();
+			
 
 			changeState(1);
+			startTutorial();
 		}
 		
 		private function closePanel(e:MouseEvent):void 
@@ -452,82 +460,8 @@ package
 		public static const STATE_TUTORIAL:int = 0;
 		public static const STATE_CHALLENGE:int = 1;
 		
-		
-	
-//Tutorial:
-		
-		private var balao:CaixaTexto;
-		private var pointsTuto:Array;
-		private var tutoBaloonPos:Array;
-		private var tutoPos:int;
-		//private var tutoPhaseFinal:Boolean;
-		private var tutoSequence:Array = ["Seu objetivo é atingir o alvo.",
-										  "Para isso você deve digitar aqui as coordenadas polares dele e clicar em \"Atirar\".",
-										  "Você pode utilizar régua e transferidor para medir essas coordenadas, mas...",
-										  "... mas o seu tempo é curto e quanto mais rápido você responder o exercício, mais pontos fará.",
-										  "Quando em dúvida, leia aqui embaixo qual deve ser o próximo passo."];
-										  
-		private function iniciaTutorial(e:MouseEvent = null):void 
-		{
-			tutoPos = 0;
-			//tutoPhaseFinal = false;
-			if(balao == null){
-				balao = new CaixaTexto(true);
-				addChild(balao);
-				balao.visible = false;
-				
-				pointsTuto = 	[new Point(),
-								new Point(),
-								new Point(),
-								new Point(),
-								new Point()];
-								
-				tutoBaloonPos = [[CaixaTexto.BOTTON, CaixaTexto.CENTER],
-								[CaixaTexto.LEFT, CaixaTexto.CENTER],
-								[CaixaTexto.LEFT, CaixaTexto.FIRST],
-								[CaixaTexto.RIGHT, CaixaTexto.FIRST],
-								[CaixaTexto.BOTTON, CaixaTexto.FIRST]];
-			}
-			balao.removeEventListener(Event.CLOSE, closeBalao);
-			//feedBackScreen.removeEventListener(Event.CLOSE, iniciaTutorialSegundaFase);
-			
-			balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
-			balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
-			balao.addEventListener(Event.CLOSE, closeBalao);
-			balao.visible = true;
-		}
-		
-		private function closeBalao(e:Event):void 
-		{
-			/*if (tutoPhaseFinal) {
-				balao.removeEventListener(Event.CLOSE, closeBalao);
-				balao.visible = false;
-				feedBackScreen.removeEventListener(Event.CLOSE, iniciaTutorialSegundaFase);
-			}else{*/
-				tutoPos++;
-				if (tutoPos >= tutoSequence.length) {
-					balao.removeEventListener(Event.CLOSE, closeBalao);
-					balao.visible = false;
-					//feedBackScreen.addEventListener(Event.CLOSE, iniciaTutorialSegundaFase);
-					//tutoPhaseFinal = true;
-				}else {
-					balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
-					balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
-				}
-			//}
-		}
-		
-		/*private function iniciaTutorialSegundaFase(e:Event):void 
-		{
-			if(tutoPhaseFinal){
-				balao.setText("Você pode começar um novo exercício clicando aqui.", tutoBaloonPos[2][0], tutoBaloonPos[2][1]);
-				balao.setPosition(160, pointsTuto[2].y);
-				tutoPhaseFinal = false;
-			}
-		}*/		
-		}
-	
-	
+
+	}
 	
 	
 }
