@@ -14,7 +14,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'5/3/2012'</value>
+      <value>'7/3/2012'</value>
     </define>
     <source-path append="true">
       <path-element>C:\Documents and Settings\Arthur Tofani\Desktop\GitHub\AI-0075\dev\src</path-element>
@@ -33,7 +33,7 @@
   <default-background-color>#FFFFFF</default-background-color>
   <default-frame-rate>30</default-frame-rate>
   <default-size>
-    <width>800</width>
+    <width>700</width>
     <height>600</height>
   </default-size>
 </flex-config>
