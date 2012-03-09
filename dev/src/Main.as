@@ -8,6 +8,7 @@ package
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
+	import flash.geom.Point;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import model.Challenge;
@@ -15,6 +16,8 @@ package
 	import model.Focus;
 	import model.Mirror;
 	import model.Obj;
+	import tutorial.CaixaTexto;
+	import tutorial.Tutorial;
 	import view.DragHandler;
 	import view.Line;
 	import view.Scene;
@@ -241,13 +244,7 @@ package
 		}
 		
 		
-		private function startTutorial():void {
-			reset()
-			var challenge:Challenge = new Challenge();
-			challenge.createChallenge(87, 253, 41, Mirror.CONVEX);
-			scene.draw(challenge);
-		}
-		
+
 		private function startChallenge():void {
 			reset();
 			challenge = new Challenge();
@@ -378,10 +375,25 @@ package
 		}
 		
 		
-		
-		private function changeChallengeState():void {
+
+		private function startTutorial():void {
+			reset()
+			var challenge:Challenge = new Challenge();
+			challenge.createChallenge(87, 253, 41, Mirror.CONVEX);
+			scene.draw(challenge);
+			
+			var tut:Tutorial = new Tutorial();
+
+			tut.adicionarBalao("teste1", new Point(30, 30), CaixaTexto.LEFT, CaixaTexto.FIRST);
+			tut.adicionarBalao("teste2", new Point(66, 130), CaixaTexto.RIGHT, CaixaTexto.CENTER);
+			tut.adicionarBalao("teste1", new Point(30, 30), CaixaTexto.LEFT, CaixaTexto.FIRST);
+			tut.iniciar(stage);
 			
 		}
+		
+		
+		
+		
 		
 		private function init(e:Event = null):void 
 		{
@@ -415,6 +427,25 @@ package
 			
 
 			changeState(1);
+			startTutorial();
+		}
+		
+		private function closePanel(e:MouseEvent):void 
+		{
+			e.target.gotoAndPlay(2);
+			Actuate.tween(e.target, 0.5, { alpha:0.8 } ).onComplete(setPanelInvisbile, e.target);
+		}
+		
+		private function setPanelInvisbile(d:DisplayObject):void 
+		{
+			d.visible = false;
+		}
+		
+		private function openPanel(d:MovieClip):void {
+			d.visible = true;
+			d.alpha = 0;
+			d.gotoAndStop(1);						
+			Actuate.tween(d, 0.5, { alpha:1 } );
 		}
 		
 		private function closePanel(e:MouseEvent):void 
@@ -451,7 +482,8 @@ package
 		public static const STATE_TUTORIAL:int = 0;
 		public static const STATE_CHALLENGE:int = 1;
 		
-		
+
 	}
+	
 	
 }
