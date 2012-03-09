@@ -448,6 +448,24 @@ package
 			Actuate.tween(d, 0.5, { alpha:1 } );
 		}
 		
+		private function closePanel(e:MouseEvent):void 
+		{
+			e.target.gotoAndPlay(2);
+			Actuate.tween(e.target, 0.5, { alpha:0.8 } ).onComplete(setPanelInvisbile, e.target);
+		}
+		
+		private function setPanelInvisbile(d:DisplayObject):void 
+		{
+			d.visible = false;
+		}
+		
+		private function openPanel(d:MovieClip):void {
+			d.visible = true;
+			d.alpha = 0;
+			d.gotoAndStop(1);						
+			Actuate.tween(d, 0.5, { alpha:1 } );
+		}
+		
 		private function drawLabel():void 
 		{
 			sprLabel.x = 0;
