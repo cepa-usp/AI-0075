@@ -14,11 +14,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-<<<<<<< HEAD
-      <value>'8/3/2012'</value>
-=======
-      <value>'7/3/2012'</value>
->>>>>>> 9a759beef660cbb50f8f5408403c598edfd99d96
+      <value>'9/3/2012'</value>
     </define>
     <source-path append="true">
       <path-element>C:\Documents and Settings\Arthur Tofani\Desktop\GitHub\AI-0075\dev\src</path-element>
@@ -29,6 +25,7 @@
     <library-path append="true">
       <path-element>C:\Documents and Settings\Arthur Tofani\Desktop\GitHub\AI-0075\dev\lib\arte.swc</path-element>
       <path-element>C:\Documents and Settings\Arthur Tofani\Desktop\GitHub\AI-0075\dev\lib\arte2.swc</path-element>
+      <path-element>C:\Documents and Settings\Arthur Tofani\Desktop\GitHub\AI-0075\dev\lib\as3corelib.swc</path-element>
     </library-path>
   </compiler>
   <file-specs>

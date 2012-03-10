@@ -22,6 +22,9 @@ package view
 	 */
 	public class Scene extends Sprite
 	{
+		private var _message:String;
+		static public const OBJECT_FOCUSOUT:String = "objectFocusout";
+		static public const OBJECT_FOCUSIN:String = "objectFocusin";
 		
 		private var layerLines:Sprite = new Sprite();
 		private var _layerObject:Sprite = new Sprite();
@@ -123,24 +126,41 @@ package view
 			addChild(focus);
 			focus.x = mirror.x + (inv * (challenge.mirror.focus.distance / scale));
 			focus.y = Config.HEIGHT / 2;
-			
+			setObjectDescription(focus, "Ponto focal");
 			center = new SpriteDot();
 			addChild(center);
+			setObjectDescription(center, "Centro de curvatura");
 			center.x = mirror.x + (inv * ((challenge.mirror.focus.distance * 2) / scale));
 			center.y = Config.HEIGHT / 2;
 			
 			
 		}
 		
+		private function setObjectDescription(obj:Sprite, text:String):void 
+		{
+			obj.useHandCursor = true;
+			obj.buttonMode = true;
+			obj.addEventListener(MouseEvent.MOUSE_OVER, function(e:MouseEvent):void { 
+				message = text;
+				dispatchEvent(new MouseEvent(Scene.OBJECT_FOCUSIN)) 
+				} );
+			obj.addEventListener(MouseEvent.MOUSE_OUT, function(e:MouseEvent):void { 
+				message = "";
+				dispatchEvent(new MouseEvent(Scene.OBJECT_FOCUSOUT)) 
+				} );
+		}
+		
 		private function drawObject(challenge:Challenge):void 
 		{
 			object = new Seta();			
 			addChild(object);
+			setObjectDescription(object, "Objeto");
 			object.x = mirror.x + (challenge.object.distance / scale);
 			object.y = Config.HEIGHT / 2;
 			
 			image = new Seta();			
 			addChild(image);
+			setObjectDescription(image, "Imagem");
 			image.x = mirror.x + (challenge.image.distance / scale);
 			
 			
@@ -158,8 +178,10 @@ package view
 		{
 				if (challenge.mirror.type == Mirror.CONCAVE) {
 					mirror = new SpriteMirror_Concave();
+					setObjectDescription(mirror, "Espelho côncavo")
 				} else {
 					mirror = new SpriteMirror_Convex();
+					setObjectDescription(mirror, "Espelho convexo")
 				}
 			
 				layerChallenge.addChild(mirror);
@@ -191,7 +213,16 @@ package view
 				cc.name = "cc";
 				spriteElement.addChild(cc);
 				cc.x = 0; cc.y = 0;
+				setObjectDescription(spriteElement, "Ponto focal");
+				setObjectDescription(cc, "Centro de curvatura");
 				
+			} else if (challenge.element is Obj && Obj(challenge.element).image) {
+				setObjectDescription(spriteElement, "Imagem");
+				spriteElement.alpha = 0.7
+				
+				
+			} else if (challenge.element is Obj && !Obj(challenge.element).image) {
+				setObjectDescription(spriteElement, "Objeto");
 			}
 			addChild(spriteElement);
 			spriteElement.x = handler.x;
@@ -381,6 +412,16 @@ package view
 		public function set scale(value:Number):void 
 		{
 			_scale = value;
+		}
+		
+		public function get message():String
+		{
+			return _message;
+		}
+		
+		public function set message(value:String):void 
+		{
+			_message = value;
 		}
 		
 		

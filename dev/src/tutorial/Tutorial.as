@@ -19,6 +19,7 @@ package tutorial
 		private var balaoatual:CaixaTexto = null;
 		
 		
+		
 		public function Tutorial() 
 		{
 			
@@ -35,11 +36,12 @@ package tutorial
 		}
 		
 		
-		public function iniciar(stage:Stage):void {
-			stage.addChild(this);
-			stage.addEventListener(MouseEvent.CLICK, proximo);
+		public function iniciar(stage:Stage):void {			
+			stage.addChild(this);						
 			position = -1;
+			dispatchEvent(new TutorialEvent(-1, TutorialEvent.INICIO_TUTORIAL, true));			
 			proximo();
+			
 			
 		}
 		
@@ -55,18 +57,23 @@ package tutorial
 			balaoatual = baloes[position];
 			balaoatual.visible = true;
 			balaoatual.alpha = 0;
-			addChild(balaoatual);			
-			Actuate.tween(balaoatual, 0.5, { alpha:1 } );
+			addChild(balaoatual);
+			dispatchEvent(new TutorialEvent(position, TutorialEvent.BALAO_ABRIU, true));
+			Actuate.tween(balaoatual, 0.5, { alpha:1 } ).onComplete(giveControl);
 			
 		}
 		
 		
+		private function giveControl():void {
+			if(position==0) stage.addEventListener(MouseEvent.CLICK, proximo);
+		}
 		
 		private function finalize():void 
 		{
-			stage.removeEventListener(MouseEvent.CLICK, proximo);
+			stage.removeEventListener(MouseEvent.CLICK, proximo);			
 			stage.removeChild(this);			
 			position = -1;
+			dispatchEvent(new TutorialEvent(-1, TutorialEvent.FIM_TUTORIAL, true));			
 		}
 		
 		

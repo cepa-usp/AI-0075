@@ -9,6 +9,7 @@ package
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import model.Challenge;
@@ -16,8 +17,10 @@ package
 	import model.Focus;
 	import model.Mirror;
 	import model.Obj;
+	import pipwerks.ScormComm;
 	import tutorial.CaixaTexto;
 	import tutorial.Tutorial;
+	import tutorial.TutorialEvent;
 	import view.DragHandler;
 	import view.Line;
 	import view.Scene;
@@ -28,7 +31,7 @@ package
 	 */
 	public class Main extends Sprite 
 	{
-		private var state:int = STATE_TUTORIAL;
+		private var state:int = -1;
 		private var score:int = 0;
 		private var scene:Scene = null;
 		private var sprScene:Sprite = new Sprite();
@@ -50,6 +53,7 @@ package
 		private var botoes:Botoes;
 		private var scorm:ScormComm = new ScormComm();
 		private var screenMessage:String;
+		private var makefinaltut:Boolean = true;
 		
 		
 		public function Main():void 
@@ -69,10 +73,16 @@ package
 			workAsButton(botoes.btReset);
 			workAsButton(botoes.btTutorial);			
 			botoes.btReset.addEventListener(MouseEvent.CLICK, performReset);
+			botoes.btTutorial.addEventListener(MouseEvent.CLICK, performTutorial);
 			botoes.btCreditos.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void { openPanel(sprAboutScreen) } );
 			botoes.btOrientacoes.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void { openPanel(sprInfoScreen) });
 			botoes.filters = [new DropShadowFilter(4, 45, 0, 1)];
 
+		}
+		
+		private function performTutorial(e:MouseEvent):void 
+		{
+			startTutorial();
 		}
 		
 		public function drawButtons():void {
@@ -117,25 +127,21 @@ package
 			addChild(screenOptions);
 			screenOptions.x = 10;
 			screenOptions.y = 10;
-			workAsButton(screenOptions.btEvaluate);
-			workAsButton(screenOptions.btLines);
+			workAsButton(screenOptions.btEvaluate, "Pressione o botão 'terminei' para avaliar sua resposta.");
+			workAsButton(screenOptions.btLines, "Use o lápis para traçar linhas auxiliares à sua construção geométrica.");
 			screenOptions.btLines.addEventListener(MouseEvent.MOUSE_DOWN, createLine);
-			screenOptions.btLines.addEventListener(MouseEvent.MOUSE_OVER, infoLine);
-			screenOptions.btLines.addEventListener(MouseEvent.MOUSE_OUT, info);
-			screenOptions.btEvaluate.addEventListener(MouseEvent.CLICK, evaluate);
+
+			
 		}
 		
 		private function info(e:MouseEvent):void 
 		{
+			
 			setMessage(screenMessage)
 		}
 		
-		private function infoLine(e:MouseEvent):void 
-		{
-			setMessage("Use o lápis e a borracha para traçar linhas guias, para auxiliar na construção geométrica.");
-		}
 		
-		private function workAsButton(o:DisplayObject):void {
+		private function workAsButton(o:DisplayObject, displayText:String = ""):void {
 			if (o is MovieClip) {				
 				MovieClip(o).useHandCursor = true;
 				MovieClip(o).buttonMode = true;
@@ -143,6 +149,10 @@ package
 				MovieClip(o).addEventListener(MouseEvent.MOUSE_OVER, buttonOnMouseOver);
 				MovieClip(o).addEventListener(MouseEvent.MOUSE_OUT, buttonOnMouseOut);
 				MovieClip(o).gotoAndStop(1);
+				if (displayText.length > 0) {
+				MovieClip(o).addEventListener(MouseEvent.MOUSE_OVER, function(e:MouseEvent):void{ setMessage(displayText) });
+				MovieClip(o).addEventListener(MouseEvent.MOUSE_OUT, info);
+				}
 			}
 		}
 		
@@ -213,7 +223,7 @@ package
 		
 		private function performReset(e:MouseEvent):void 
 		{
-			changeState(state);
+			changeState(1);
 		}
 		
 		public function reset():void 
@@ -225,8 +235,16 @@ package
 					
 				}
 			}
-			scene = new Scene();			
+			scene = new Scene();
+			scene.addEventListener(Scene.OBJECT_FOCUSIN, makeSceneInfo);
+			scene.addEventListener(Scene.OBJECT_FOCUSOUT, info);
+			
 			sprScene.addChild(scene);
+		}
+		
+		private function makeSceneInfo(e:Event):void 
+		{
+			setMessage(scene.message);
 		}
 		
 		public function changeState(vstate:int):void {
@@ -259,16 +277,25 @@ package
 				case Challenge.CHALLENGESTATUS_CREATING:
 					setMessage("Criando nova situação");
 					hideTools()
-					hideAnswerTools();
+					hideAnswerTools();					
+					screenOptions.btEvaluate.alpha = 0.5;
+					btGetElement.alpha = 0.5;
+					screenOptions.btEvaluate.removeEventListener(MouseEvent.CLICK, evaluate);
 					break;
+					
 				case Challenge.CHALLENGESTATUS_WAITINGPOSITION:
 				
 					setMessage("Arraste o elemento no canto superior esquerdo da tela (" + getIncogName() + ") e posicione-o de modo a completar a construção geométrica.", true);
 						//setMessage("Pegue o elemento da caixa (" + getIncogName() + ") e arraste-o para dentro do cenário.");
+					Actuate.tween(btGetElement, 0.5, { alpha:1 } );
 					showTools();
+					
 					break;
 				case Challenge.CHALLENGESTATUS_WAITINGANSWER:
 					setMessage("Posicione o elemento e, quando tiver concluído, pressione 'terminei'. Se precisar inverter o elemento, pegue-o pelo topo e arraste para baixo.", true);
+					screenOptions.btEvaluate.addEventListener(MouseEvent.CLICK, evaluate);
+					Actuate.tween(screenOptions.btEvaluate, 0.5, { alpha:1 } );
+					Actuate.tween(btGetElement, 0.5, { alpha:0.4 } );
 					btGetElement.removeEventListener(MouseEvent.MOUSE_DOWN, createElement)
 					break;					
 				case Challenge.CHALLENGESTATUS_EVALUATING:
@@ -276,10 +303,10 @@ package
 					hideTools()
 
 					break;
-				case Challenge.CHALLENGESTATUS_SHOWANSWER:
-				
+				case Challenge.CHALLENGESTATUS_SHOWANSWER:					
 					computeScore();
 					showAnswerTools();
+					
 					break;					
 			}
 			
@@ -291,8 +318,8 @@ package
 			//btShowAnswer.visible = false;
 		}
 		
-		private function showTools():void 
-		{
+		private function putGetElement():void {
+			if (btGetElement != null) screenOptions.removeChild(btGetElement);
 			if (challenge.hiddenElement is Focus) btGetElement = new DragFocus();
 			if (challenge.hiddenElement is Obj) {
 				if (Obj(challenge.hiddenElement).image) {
@@ -301,15 +328,22 @@ package
 					btGetElement = new DragObject();
 				}
 			}
-			btGetElement.x = 30;
-			btGetElement.y = 100;
+			//btGetElement.x = 30;
+			//btGetElement.y = 100;
+			btGetElement.x = screenOptions.box.x;// + screenOptions.box.width / 2;
+			btGetElement.y = screenOptions.box.y;// + screenOptions.box.height  / 2;
+			
+			screenOptions.addChild(btGetElement);						
+			Actuate.tween(screenOptions, 1, { alpha:1 }, true);			
+		}
+		
+		private function showTools():void 
+		{
+			putGetElement()
 			btGetElement.addEventListener(MouseEvent.MOUSE_DOWN, createElement)
 			btGetElement.addEventListener(MouseEvent.MOUSE_OVER, infoElement)
 			btGetElement.addEventListener(MouseEvent.MOUSE_OUT, info)
-			screenOptions.addChild(btGetElement);			
-			btGetElement.x = screenOptions.box.x;// + screenOptions.box.width / 2;
-			btGetElement.y = screenOptions.box.y;// + screenOptions.box.height  / 2;
-			Actuate.tween(screenOptions, 1, { alpha:1 }, true);			
+
 		}
 		
 		private function infoElement(e:MouseEvent):void 
@@ -356,6 +390,7 @@ package
 
 		private function showAnswerTools():void 
 		{
+			startTutorial2();
 			viewAnswer = false;
 			btShowAnswer1.visible = true;
 			btShowAnswer2.visible = false;
@@ -366,6 +401,7 @@ package
 		
 		private function computeScore():void 
 		{
+			scorm.setScore(100);
 			
 			setMessage("Resultado: " + challenge.score.toString() + "/100. Pressione 'novo exercício' para começar um outro exercício, diferente do anterior.", true);
 			
@@ -377,18 +413,52 @@ package
 		
 
 		private function startTutorial():void {
+			makefinaltut = true;
 			reset()
-			var challenge:Challenge = new Challenge();
-			challenge.createChallenge(87, 253, 41, Mirror.CONVEX);
+			
+			challenge = new Challenge();
+			challenge.createChallenge(87, 253, 41, Mirror.CONVEX, 1);
 			scene.draw(challenge);
+			putGetElement();
 			
 			var tut:Tutorial = new Tutorial();
-
-			tut.adicionarBalao("teste1", new Point(30, 30), CaixaTexto.LEFT, CaixaTexto.FIRST);
-			tut.adicionarBalao("teste2", new Point(66, 130), CaixaTexto.RIGHT, CaixaTexto.CENTER);
-			tut.adicionarBalao("teste1", new Point(30, 30), CaixaTexto.LEFT, CaixaTexto.FIRST);
+			tut.addEventListener(TutorialEvent.BALAO_ABRIU, onBalaoAbriu)
+			tut.addEventListener(TutorialEvent.FIM_TUTORIAL, onFinishTutorial)
+			tut.adicionarBalao("Esta ilustração representa a construção geométrica que relaciona um objeto à sua imagem, refletida num espelho esférico. Mas falta um elemento nessa construção...", new Point(350, 150), CaixaTexto.BOTTOM, CaixaTexto.CENTER);
+			tut.adicionarBalao("Arraste e posicione o elemento que falta para a ilustração no centro da tela de modo a completar o esquema. Quando tiver terminado, pressione 'terminei' para verificar sua resposta.", new Point(100, 40), CaixaTexto.LEFT, CaixaTexto.FIRST);
+			tut.adicionarBalao("Você pode usar o lápis para traçar algumas linhas guias, se quiser.", new Point(100, 170), CaixaTexto.LEFT, CaixaTexto.LAST);
 			tut.iniciar(stage);
 			
+			
+			
+		}
+
+		private function startTutorial2():void {
+			if (makefinaltut) {
+			var tut:Tutorial = new Tutorial();
+			tut.addEventListener(TutorialEvent.BALAO_ABRIU, onBalaoAbriu)
+			//tut.addEventListener(TutorialEvent.FIM_TUTORIAL, onFinishTutorial)			
+			tut.adicionarBalao("Pressione 'novo exercício' para fazer outro exercício, diferente do anterior. Você pode fazer isso quantas vezes quiser.", new Point(260, 70), CaixaTexto.RIGHT, CaixaTexto.FIRST);
+			tut.iniciar(stage);
+			makefinaltut = false;
+
+			}
+			
+			
+			
+		}		
+		
+		private function onFinishTutorial(e:TutorialEvent):void 
+		{
+			changeState(STATE_CHALLENGE);
+		}
+		
+		private function onBalaoAbriu(e:TutorialEvent):void 
+		{
+			switch(e.numBalao) {
+				case 0:
+					break;
+			}
 		}
 		
 		
@@ -399,7 +469,8 @@ package
 		{
 			
 			removeEventListener(Event.ADDED_TO_STAGE, init);
-			scorm.initLMSConnection(0, 100);
+			scorm.connectScorm();
+			
 
 			//addChild(new Background());
 			addChild(sprButtons);
@@ -424,22 +495,13 @@ package
 			sprAboutScreen.visible = false;
 			sprInfoScreen.visible = false;
 			addChild(new LOBorder());
+			setMessage(" ", true)
+			scrollRect = new Rectangle(0, 0, 700, 600);
+			screenOptions.btEvaluate.alpha = 0.5;
+			changeState(0);
 			
+		}
 
-			changeState(1);
-			startTutorial();
-		}
-		
-		private function closePanel(e:MouseEvent):void 
-		{
-			e.target.gotoAndPlay(2);
-			Actuate.tween(e.target, 0.5, { alpha:0.8 } ).onComplete(setPanelInvisbile, e.target);
-		}
-		
-		private function setPanelInvisbile(d:DisplayObject):void 
-		{
-			d.visible = false;
-		}
 		
 		private function openPanel(d:MovieClip):void {
 			d.visible = true;
@@ -459,12 +521,7 @@ package
 			d.visible = false;
 		}
 		
-		private function openPanel(d:MovieClip):void {
-			d.visible = true;
-			d.alpha = 0;
-			d.gotoAndStop(1);						
-			Actuate.tween(d, 0.5, { alpha:1 } );
-		}
+
 		
 		private function drawLabel():void 
 		{
@@ -473,10 +530,12 @@ package
 		}
 		
 		private function setMessage(tx:String, save:Boolean = false):void {
+			if (state == STATE_TUTORIAL) return;
 			if (save) screenMessage = tx;
 			sprLabel.legenda.texto.text = tx;
 			
 		}
+		
 		
 		
 		public static const STATE_TUTORIAL:int = 0;
