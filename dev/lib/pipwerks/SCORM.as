@@ -29,25 +29,21 @@ Examples for this script can be found at http://pipwerks.com/lab/scorm/
 Use at your own risk! This class is provided as-is with no implied warranties or guarantees.
 */
 
-package {
+package pipwerks {
 
 	import flash.external.*;
-	import flash.text.TextField;
 	
 	public class SCORM {
 		
-		private var __connectionActive:Boolean = false,
-					__debugActive:Boolean = true;
-		
-		private var textOnStage:TextField;
-		private var is_EI_available:Boolean;
+		private var __connectionActive = false,
+					__debugActive = true;
 	
 	
 		public function SCORM() {
 		
-			is_EI_available = ExternalInterface.available;
-			var wrapperFound:Boolean = false;
-			var debugMsg:String = "Initializing SCORM class. Checking dependencies: ";
+			var is_EI_available:Boolean = ExternalInterface.available,
+				wrapperFound:Boolean = false,
+				debugMsg:String = "Initializing SCORM class. Checking dependencies: ";
 				
 			if(is_EI_available){
 				
@@ -71,18 +67,16 @@ package {
 				debugMsg += "ExternalInterface is NOT available (this may be due to an outdated version of Flash Player).  Course cannot load.";
 				
 			}
-			
+	
 			__displayDebugInfo(debugMsg);
-			
+		
 		}
-			
+	
+	
+		
 		// --- public functions --------------------------------------------- //
 		
-		public function set debugTextField(textFieldOnStage:TextField):void
-		{
-			textOnStage = textFieldOnStage;
-		}
-		
+	
 		public function set debugMode(status:Boolean):void {
 			this.__debugActive = status;
 		}
@@ -122,9 +116,11 @@ package {
 		private function __connect():Boolean {
 			
 			var result:Boolean = false;
-			if(!__connectionActive && is_EI_available){
+			if(!__connectionActive){
+				
 				var eiCall:String = String(ExternalInterface.call("pipwerks.SCORM.init"));
 				result = __stringToBoolean(eiCall);
+				
 				if (result){
 					__connectionActive = true;
 				} else {
@@ -141,7 +137,9 @@ package {
 			} else {
 				  __displayDebugInfo("pipwerks.SCORM.init aborted: connection already active.");
 			}
+			
 			__displayDebugInfo("__connectionActive: " +__connectionActive);
+			
 			return result;
 		}
 	
@@ -251,10 +249,9 @@ package {
 		}
 	
 		private function __displayDebugInfo(msg:String):void {
-			if (__debugActive) {
-				if(textOnStage != null) textOnStage.appendText(msg + "\n");
+			if(__debugActive){
 				//trace(msg);
-				//ExternalInterface.call("pipwerks.UTILS.trace", msg);
+				ExternalInterface.call("pipwerks.UTILS.trace", msg);
 			}
 		}
 		
@@ -276,9 +273,6 @@ package {
 			return false;
 		}
 		
-		public function get connected():Boolean {
-			return __connectionActive;
-		}
 
 		
 	} // end SCORM class

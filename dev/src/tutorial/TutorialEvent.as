@@ -8,17 +8,21 @@ package tutorial
 	 */
 	public class TutorialEvent extends Event 
 	{
+		static public const INICIO_TUTORIAL:String = "inicioTutorial";
+		static public const BALAO_ABRIU:String = "balaoAbriu";
+		static public const FIM_TUTORIAL:String = "fimTutorial";
 		private var _numBalao:int;
 		
-		public function TutorialEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false) 
+		public function TutorialEvent(numbalao:int, type:String, bubbles:Boolean=false, cancelable:Boolean=false) 
 		{ 
+			_numBalao = numbalao;
 			super(type, bubbles, cancelable);
 			
 		} 
 		
 		public override function clone():Event 
 		{ 
-			return new TutorialEvent(type, bubbles, cancelable);
+			return new TutorialEvent(_numBalao, type, bubbles, cancelable);
 		} 
 		
 		public override function toString():String 
@@ -36,6 +40,8 @@ package tutorial
 			_numBalao = value;
 		}
 		
+		
+
 	}
 	
 }

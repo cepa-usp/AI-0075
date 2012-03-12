@@ -4,7 +4,7 @@
   <output>
     <movie disabled="False" />
     <movie input="" />
-    <movie path="bin\AI0075b.swf" />
+    <movie path="bin\AI-0075.swf" />
     <movie fps="30" />
     <movie width="700" />
     <movie height="600" />
@@ -50,6 +50,7 @@
   <libraryPaths>
     <element path="lib\arte.swc" />
     <element path="lib\arte2.swc" />
+    <element path="lib\as3corelib.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

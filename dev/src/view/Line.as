@@ -47,7 +47,7 @@ package view
 			handler2.graphics.beginFill(0x400000);
 			handler2.graphics.drawRect( -2, -2, 5, 5); 				
 			handler2.addEventListener(MouseEvent.MOUSE_DOWN, onHandlerStartMove);
-			handler2.x = _startPoint.x + 20;
+			handler2.x = _startPoint.x + 40;
 			handler2.y = _startPoint.y + 5;
 			drawLine();
 			
@@ -86,10 +86,10 @@ package view
 		private function drawLineStyled(side:Boolean, ptIni:Point, ptEnd:Point):void {
 			trace("side", side);
 			if (side) {
-				line.graphics.lineStyle(0.5, 0xFF8000, 1, true, LineScaleMode.NONE);
+				line.graphics.lineStyle(0.5, 0x979797, 1, true, LineScaleMode.NONE);
 				drawDottedLine(ptIni, ptEnd)
 			} else {
-				line.graphics.lineStyle(0.5, 0xFF3C3C, 1,true, LineScaleMode.NONE);				
+				line.graphics.lineStyle(0.5, 0x979797, 1,true, LineScaleMode.NONE);				
 				line.graphics.lineTo(ptEnd.x, ptEnd.y);
 			}
 		}
@@ -97,11 +97,11 @@ package view
 		private function changeLineStyle(val:int):void {
 			return;
 			if (_side) {
-				if (val == 2) line.graphics.lineStyle(0.5, 0xFF8000, 1, true, LineScaleMode.NONE);
-				if (val==1) line.graphics.lineStyle(0.5, 0xFF3C3C, 1,true, LineScaleMode.NONE);				
+				if (val == 2) line.graphics.lineStyle(0.5, 0xCCCCCC, 1, true, LineScaleMode.NONE);
+				if (val==1) line.graphics.lineStyle(0.5, 0xCCCCCC, 1,true, LineScaleMode.NONE);				
 			} else {
-				if (val == 2) line.graphics.lineStyle(0.5, 0xFF3C3C, 1, true, LineScaleMode.NONE);
-				if (val==1) line.graphics.lineStyle(0.5, 0xFF8000, 1,true, LineScaleMode.NONE);								
+				if (val == 2) line.graphics.lineStyle(0.5, 0xCCCCCC, 1, true, LineScaleMode.NONE);
+				if (val==1) line.graphics.lineStyle(0.5, 0xCCCCCC, 1,true, LineScaleMode.NONE);								
 			}
 		}
 		

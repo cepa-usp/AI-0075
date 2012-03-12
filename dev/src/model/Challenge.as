@@ -24,7 +24,7 @@ package model
 			
 		}
 		
-		public function createChallenge(focusDistance:Number=Number.NaN, objectDistance:Number=Number.NaN, objectSize:Number=Number.NaN, mirrorType:int=-1):void {
+		public function createChallenge(focusDistance:Number=Number.NaN, objectDistance:Number=Number.NaN, objectSize:Number=Number.NaN, mirrorType:int=-1, objinc:int = -1):void {
 			this.state = CHALLENGESTATUS_CREATING;
 			mirror = new Mirror();
 			if(mirrorType==-1){
@@ -70,7 +70,12 @@ package model
 				//return;
 			}
 			
-			var rnd:int = Math.floor(Math.random() * 3);
+			
+			if(objinc==-1){
+				var rnd:int = Math.floor(Math.random() * 3);
+			} else {
+				rnd = objinc
+			}
 			switch(rnd) {
 				case 0:
 					hiddenElement = object.clone();
