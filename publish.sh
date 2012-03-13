@@ -6,7 +6,7 @@
 
 # TODO: how can I find cywin? 
 PATH=$PATH:/c/cygwin/bin/
-REMOTE_DESTINATION="cepa@arquivos.atp.usp.br:/work/PUBLICACAO/ai"
+REMOTE_DESTINATION="cepa@arquivos.atp.usp.br:/work/PUBLICACAO/atividades-interativas"
 LOG_FILE="$(pwd)/publish.log"
 FROM="./deployment/"
 
